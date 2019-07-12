@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using RiskFirstAddressSvc.Controllers;
 using RiskFirstAddressSvc.Data;
@@ -18,9 +19,10 @@ namespace RiskFirstAddressSvcTest
         public void TestGetAddressCallsDataSource()
         {
             var dataSrc = new Mock<IAddressDataSource>();
+            var logger = new Mock<ILogger<AddressController>>();
             var addresses = CreateAddresses();
             dataSrc.Setup(d => d.GetAllAddresses()).Returns(addresses).Verifiable();
-            var target = new AddressController(dataSrc.Object);
+            var target = new AddressController(dataSrc.Object, logger.Object);
             var results = target.GetAddressesByCity();
 
             var london = results.Where(r => r.CityGroupName == "London").FirstOrDefault();

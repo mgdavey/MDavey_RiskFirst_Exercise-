@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using RiskFirstAddressSvc.Data;
 using RiskFirstAddressSvc.Model;
 
@@ -15,14 +16,16 @@ namespace RiskFirstAddressSvc.Controllers
     {
 
         private readonly IAddressDataSource _dataSrc;
+        private readonly ILogger<AddressController> _logger;
 
         /// <summary>
         /// Controller for REST calls pertaining to user addresses
         /// </summary>
         /// <param name="dataSrc">DataSource for address data</param>
-        public AddressController(IAddressDataSource dataSrc)
+        public AddressController(IAddressDataSource dataSrc, ILogger<AddressController> logger)
         {
             _dataSrc = dataSrc;
+            _logger = logger;
         }
 
         /// <summary>
@@ -32,7 +35,6 @@ namespace RiskFirstAddressSvc.Controllers
         [HttpGet("AddressByCity")]
         public IEnumerable<AddressGroup> GetAddressesByCity()
         {
-
             try
             {
                 var all = _dataSrc.GetAllAddresses();
@@ -40,6 +42,7 @@ namespace RiskFirstAddressSvc.Controllers
             }
             catch(Exception ex)
             {
+                _logger.LogError($"An error ocurred returning address groups: {ex}");
                 throw ex;
             }
         }

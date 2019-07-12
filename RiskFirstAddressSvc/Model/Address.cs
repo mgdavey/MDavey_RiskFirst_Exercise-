@@ -20,6 +20,12 @@ namespace RiskFirstAddressSvc.Model
         private string _city;
         private string _country;
 
+        /// <summary>
+        /// Cleans the data for proper names being set to address properties. Intended to clean up data issue with city capitalization in this exercise.
+        /// Note: Not completely robust for all possible proper names, but suitable for this purpose.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         private string ProperNounClean(string name)
         {
             var retVal = string.Empty;

@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.IO;
+using Moq;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace RiskFirstAddressSvcTest
 {
@@ -14,7 +17,10 @@ namespace RiskFirstAddressSvcTest
         [TestMethod]
         public void TestDataLoad()
         {
-            var src = new JsonFileAddressDataSource("TestAddresses.json");
+            var logger = new Mock<ILogger<JsonFileAddressDataSource>>();
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c["AddressDataFile"]).Returns("TestAddresses.json").Verifiable();
+            var src = new JsonFileAddressDataSource(config.Object, logger.Object);
             var addresses = src.GetAllAddresses();
             Assert.AreEqual(addresses.Count(), 3);
 
@@ -37,7 +43,10 @@ namespace RiskFirstAddressSvcTest
         [ExpectedException(typeof(FileNotFoundException))]
         public void LoadDataThrows()
         {
-            var src = new JsonFileAddressDataSource("NotFound.json");
+            var logger = new Mock<ILogger<JsonFileAddressDataSource>>();
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c["AddressDataFile"]).Returns("Notfound.json").Verifiable();
+            var src = new JsonFileAddressDataSource(config.Object, logger.Object);
             src.Init();
         }
 

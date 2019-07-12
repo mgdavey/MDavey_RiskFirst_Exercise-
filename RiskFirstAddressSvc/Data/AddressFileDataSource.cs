@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Configuration;
 using System.IO;
 using log4net;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace RiskFirstAddressSvc.Data
 {
@@ -16,17 +18,23 @@ namespace RiskFirstAddressSvc.Data
     /// </summary>
     public class JsonFileAddressDataSource : IAddressDataSource
     {
+        private readonly ILogger<JsonFileAddressDataSource> _logger;
+        private IEnumerable<Address> _addresses;
+        private readonly string _filePath;
 
-        private ILog _logger = LogManager.GetLogger(typeof(JsonFileAddressDataSource));
-
-        public JsonFileAddressDataSource(string filePath)
+        public JsonFileAddressDataSource(IConfiguration config, ILogger<JsonFileAddressDataSource> logger)
         {
-            _filePath = filePath;
+            _filePath = config["AddressDataFile"];
+            _logger = logger;
         }
 
+        /// <summary>
+        /// Returns all addresses in datastore
+        /// </summary>
+        /// <returns>A collection of all the individual lines in the data store</returns>
         public IEnumerable<Address> GetAllAddresses()
         {
-            if(_addresses == null)
+            if (_addresses == null)
             {
                 Init();
             }
@@ -37,25 +45,24 @@ namespace RiskFirstAddressSvc.Data
         {
             try
             {
-                _logger.Info($"Initializing AddressFileDataSoure. Loading address file _filepath");
+                _logger.LogInformation($"Initializing AddressFileDataSoure. Loading address file { _filePath }");
                 if (_addresses == null)
                 {
                     _addresses = new List<Address>();
                     using (TextReader rdr = new StreamReader(_filePath))
                     {
                         _addresses = (List<Address>)JsonConvert.DeserializeObject(rdr.ReadToEnd(), typeof(List<Address>));
-                        _logger.Info($"Address file loaded _addresses.Count() addresses");
+                        _logger.LogInformation($"Address file loaded {_addresses.Count()} addresses");
                     }
                 }
             }
             catch(Exception ex)
             {
-                _logger.Error($"Unable to initialize Address Data", ex);
+                _logger.LogError($"Unable to initialize Address Data", ex);
                 throw;
             }
         }
 
-        private IEnumerable<Address> _addresses;
-        private readonly string _filePath;
+       
     }
 }
